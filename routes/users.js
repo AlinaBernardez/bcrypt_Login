@@ -6,7 +6,7 @@ const { generateToken, verifyToken } = require('../middlewares/authMiddleware');
 
 
 router.get('/', (req, res) => {
-    if(!session.token) {
+    if(!req.session.token) {
         const loginForm = `
         <form action='/login' method='post'>
             <label for='username'>Usuario:</label>
@@ -35,7 +35,7 @@ router.post('/login', (req, res) => {
     );
     if (user) {
         const token = generateToken(user);
-        session.token = token;
+        req.session.token = token;
         res.redirect('/dashboard');
     } else {
         res.status(401).json({ message: 'Unathorized!' });
@@ -43,12 +43,11 @@ router.post('/login', (req, res) => {
 });
 
 router.post('/logout', (req, res) => {
-    session.destroy();
+    req.session.destroy();
     res.redirect('/');
 });
 
-router.get('/dashboard', (req, res) => {
-    console.log(req.user)
+router.get('/dashboard', verifyToken, (req, res) => {
     const id = req.user;
     const user = users.find(user => user.id === id);
     if (user) {

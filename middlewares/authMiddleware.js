@@ -1,13 +1,12 @@
 const jwt = require('jsonwebtoken');
 const hashedSecret = require('../crypto/config');
-const session = require('express-session');
 
 function generateToken(user) {
     return jwt.sign({ user: user.id }, hashedSecret, { expiresIn: '1h' });
 };
 
 function verifyToken(req, res, next) {
-    const token = session.token;
+    const token = req.session.token;
     if (!token) {
         return res.status(401).json({ message: 'No token!' });
     } else {
@@ -17,7 +16,6 @@ function verifyToken(req, res, next) {
         }
         req.user = decoded.user;
         next();
-        return req.user
         });
     }
 };
